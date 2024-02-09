@@ -1,5 +1,15 @@
 FROM node:20-slim
 
-USER node
+WORKDIR /app
 
-WORKDIR /usr/src/app
+COPY . .
+
+RUN npm ci
+
+EXPOSE 3000
+
+USER root
+
+CMD [ "npm", "run", "dev" ]
+
+

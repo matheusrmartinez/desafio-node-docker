@@ -1,28 +1,56 @@
-import mysqld from 'mysql';
+import mysql from 'mysql2';
 import express from 'express';
-import { config } from './db-config';
 import { uniqueNamesGenerator, names } from 'unique-names-generator';
+
+export const config = {
+  host: 'db',
+  user: 'root',
+  password: '123456',
+  database: 'nodedb',
+};
 
 const app = express();
 const port = 3000;
 
-let connection = mysqld.createConnection(config);
+let connection = mysql.createConnection(config);
+const createTableIfNotExists = async () => {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS people (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(255) NOT NULL
+    )
+  `;
 
-app.get('/', async (res) => {
+  try {
+    return new Promise((resolve, reject) => {
+      connection.query(sql, (error) => {
+        if (error) {
+          console.error(error);
+          reject();
+        }
+        resolve();
+      });
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+await createTableIfNotExists();
+
+app.get('/', async (_, res) => {
   await addName();
   const people = await getPeople();
-
   const text = `<h1>Full Cycle Rocks!</h1>`;
   const html = `
       <body>
         ${text}
         Lista de pessoas cadastradas:
         <ul>
-          ${people.map((person) => `<li>${person.name}</li>`).join(', ')}
+          ${people.map((person) => `<li>${person.name}</li>`)}
         </ul>
       </body>
   `;
-
   res.send(html);
 });
 
@@ -36,7 +64,7 @@ export const addName = () => {
   };
 
   const characterName = uniqueNamesGenerator(config);
-  const sql = `INSERT INTO people(name) values (?)`;
+  const sql = `INSERT INTO people(name) values ('${characterName}')`;
 
   return new Promise((resolve, reject) => {
     connection.query(sql, [characterName], (error) => {
