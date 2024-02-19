@@ -6,6 +6,8 @@ services:
       context: ./node
     container_name: node
     image: matheusmartinez/node:prod
+    volumes:
+      - ./node:/app
     networks:
       - node-network
     tty: true
