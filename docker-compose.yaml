@@ -7,7 +7,7 @@ services:
     container_name: node
     image: matheusmartinez/node:prod
     volumes:
-      - ./node:/app
+      - ./node:/usr/src/app
     networks:
       - node-network
     tty: true
@@ -49,6 +49,7 @@ services:
     build:
       context: ./nginx
     container_name: nginx
+    restart: always
     image: matheusmartinez/nginx-node:prod
     ports:
       - '8080:80'
